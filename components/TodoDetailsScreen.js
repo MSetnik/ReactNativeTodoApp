@@ -1,8 +1,18 @@
 import React from 'react';
 import {View,Button, Text, StyleSheet} from 'react-native';
 import Header from './Header';
+import { connect } from 'react-redux';
+import {todoDelete} from '../redux/actions/actionCreators';
 
-export default function TodoDetailsScreen() {
+function TodoDetailsScreen(props) {
+
+    console.log( props.route.params.todoId)
+
+    function deleteTodo(){
+        props.deleteTodos(props.route.params.todoId)
+        props.navigation.navigate('TodoListScreen')
+    }
+
     return(
         <View style={styles.container}>
             <View style={styles.mainView}>
@@ -11,7 +21,7 @@ export default function TodoDetailsScreen() {
                         <Button title='Completed'/>
                     </View>
                     <View style={styles.btns}>
-                        <Button title='Delete' color='red'/>
+                        <Button title='Delete' color='red' onPress={() => deleteTodo()}/>
                     </View>
                 </View>
                 <View style={styles.viewTodoText}>
@@ -45,3 +55,19 @@ const styles = StyleSheet.create({
         fontSize: 18
     }
 })
+
+const mapStateToProps = (state,id) => {
+    const todos = state
+    return { 
+        todos: todos,
+        id: id 
+    };
+}
+
+const dispatchStateToProps = dispatcher => {
+    return { 
+        deleteTodos: (id) => dispatcher(todoDelete(id)) 
+    };
+}
+
+export default connect(mapStateToProps, dispatchStateToProps)(TodoDetailsScreen)

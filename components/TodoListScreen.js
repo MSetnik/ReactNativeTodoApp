@@ -1,9 +1,15 @@
 import React, {useState} from 'react';
 import { Text, View, StyleSheet, FlatList, TextInput, Button, ToastAndroid, TouchableWithoutFeedback} from 'react-native';
 import Header from './Header';
+import store from '../redux/store/store';
+import {connect} from 'react-redux';
+import {todoAdded} from '../redux/actions/actionCreators';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { registerRootComponent } from 'expo';
+import {getUserTodos} from '../redux/actions/actionCreators';
 
 
-export default function TodoListScreen({navigation}) {
+function TodoListScreen(props) {
     const [tasks, setTasks] = useState([{
         id: 1,
         text: 'baciti smece'
@@ -13,7 +19,15 @@ export default function TodoListScreen({navigation}) {
       }]);
 
     const[text, setText] = useState('');
+    // console.log(' props ' + props.todos)
+    // const store = useStore();
+    
 
+    // storeSubs();
+    // const {userId} = route.params
+    // console.log(userId);
+    // console.log(store.getState());
+    console.log(props)
 
     const changeHandler = (text) => {
         setText(text)
@@ -65,32 +79,66 @@ export default function TodoListScreen({navigation}) {
         });
         console.log('clicked');
       }
+
+
+    
+    const userTodos = () => {
+      // return props.todos.filter((item) => item.userId == userLoggedIn.id )
+      var userLoggedInID = null
+      props.state.userReducer.forEach(user => {
+        if(user.signedIn) {
+          userLoggedInID = user.id
+        }
+      });
+      return userLoggedInID
+
+      // var todos = []
+      // props.todos.forEach(todo => {
+      //   if(todo.userId == userLoggedInID) {
+      //     todos.push(todo)
+      //   }
+      // });
+      // console.log(todos)
+      // return todos;
+      // console.log(userLoggedIn.map((item) => item.signedIn ? item.id : null))
+    }
+    // console.log(userTodos())
+    // console.log(props.getUserTodos(1))
+
+    // console.log(() => userTodos)
+    // console.log(props.todos.filter(todo => todo.userId == userTodos()))
     return(
         <View style={styles.mainView}>
             <View style={styles.flatlistView}>
                 <FlatList style={styles.flatlistContainer}
-                data={tasks}
+                data={props.userTodos}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({item}) => (
-                  <TouchableWithoutFeedback onPress={() => navigation.navigate('TodoDetailsScreen')}>
-                      <View style={styles.flatlistContent} onPress={() => navigation.navigate('TodoListScreen')}>
-                          <Text style={styles.textTask}>{item.text}</Text>
+                  <Swipeable>
+                    <TouchableWithoutFeedback onPress={() => props.navigation.navigate('TodoDetailsScreen', {
+                      todoId: item.id.toString()
+                    })}>
+                    
+                      <View style={styles.flatlistContent} >
+                          <Text style={styles.textTask}>{item.todoText}</Text>
                           {/* <Button style={styles.btnDelete} /*onPress={() => deleteCallback(item.id)} title='delete'></Button> */}
                       </View>
                     </TouchableWithoutFeedback>
+                    </Swipeable>
                 )}>
                 </FlatList>
             </View>
             
             <View style={styles.containerInput}>
-                <TextInput placeholder="Unesite zadatak" 
+                <TextInput placeholder={props.state.userReducer.map((user) => user.signedIn ? user.username : null)}
                 style={styles.input}
                 onChangeText={changeHandler} />
-                <Button style={styles.btnAdd} /*onPress={() => addTask(text)}*/ onPress={() => navigation.navigate('TodoFormScreen')} title="Add"/>
+                <Button style={styles.btnAdd} /*onPress={() => addTask(text)}*/ onPress={() => props.navigation.navigate('TodoFormScreen')} title="Add"/>
             </View>
         </View>
     )
 }
+
 
 const styles = StyleSheet.create({
     mainView: {
@@ -132,3 +180,30 @@ const styles = StyleSheet.create({
         paddingLeft: 10
     }
 })
+
+
+const mapStateToProps = state => {
+  console.log(state)
+  var userid = null;
+  state.userReducer.forEach(user => {
+    if(user.signedIn) {
+      userid = user.id
+    }
+  });
+  
+  const todos = state.todoReducer.filter(todo => todo.userId == userid)
+  console.log(todos, userid);
+  return { 
+    todos: state.todoReducer,
+    state: state,
+    userTodos: todos
+  };
+};
+
+const dispatchStateToProps = dispatcher => {
+  return { 
+    getUserTodos: (id) => dispatcher(getUserTodos(id))
+  };
+}
+
+export default connect(mapStateToProps, dispatchStateToProps)(TodoListScreen);

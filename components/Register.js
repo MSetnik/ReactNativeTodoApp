@@ -1,37 +1,14 @@
-import React, {useState} from 'react';
+import React, {useState} from 'react'
 import {View, Text, StyleSheet, ImageBackground, TextInput, Button } from 'react-native';
 import background from '../assets/loginImg.jpg';
-import Register from './Register'
-import { connect } from 'react-redux';
-
-import {userLoggedIn} from '../redux/actions/actionCreators';
 
 
-function Login(props) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-
-    console.log(props)
-    console.log(props.state)
-    console.log(props.state.username)
-
-    function checkLogin(username, password){
-        props.state.forEach(user => {
-            if(user.username == username && user.password == password ) {
-                props.login(user.id, true)
-                props.route.params.loginCallback(true)
-            }
-        });
-        props.state.filter((item) => item.username == username && item.password == password ? 
-            console.log(props.route.params.loginCallback(true))
-            : null)
-    }
-
+export default function Register() {
     return(
         <View style={styles.mainView}>
             <ImageBackground style={styles.image}  source={background}>
                 <View style={styles.loginContainer}>
-                    <Text style={styles.mainText}>Login</Text>
+                    <Text style={styles.mainText}>Register</Text>
                     <View style={styles.loginInputContainer}>
                         <View style={styles.usernameView}>
                             <Text style={styles.usernameText}>Username:</Text>
@@ -43,11 +20,7 @@ function Login(props) {
                         </View>
                     </View>
                     <View style={styles.viewLoginBtn}>
-                        <Button style={styles.buttonLogin} onPress={() => checkLogin(username, password)}  title='Log in'/>           
-                    </View>
-                    <View style={styles.viewRegisterBtn}>
-                        <Text style={styles.registerText}>Dont have an account? Register here!</Text>
-                        <Button style={styles.buttonRegister} title='Register' onPress={() => props.navigation.navigate('Register')}/>
+                        <Button style={styles.buttonLogin} onPress={() => checkLogin(username, password)}  title='Register'/>           
                     </View>
                 </View>
             </ImageBackground >
@@ -72,7 +45,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         width: 300,
-        height: 500
+        height: 450
     },
     mainText: {
         fontSize: 30,
@@ -134,15 +107,3 @@ const styles = StyleSheet.create({
         fontSize: 16
     }
 })
-
-const mapStateToProps = state => {
-    return{ state: state.userReducer}
-}
-
-const dispatchStateToProps = dispatcher => {
-    return {
-        login: (id,success) => dispatcher(userLoggedIn(id, success))
-    }
-}
-
-export default connect(mapStateToProps, dispatchStateToProps)(Login)
